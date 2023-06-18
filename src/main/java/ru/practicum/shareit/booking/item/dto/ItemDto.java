@@ -12,11 +12,15 @@ import javax.validation.constraints.NotNull;
 @Data
 public class ItemDto {
 
+    private long id;
+
     @NotNull(groups = ValidationMarker.OnCreate.class)
     @NotEmpty(groups = ValidationMarker.OnCreate.class)
     private String name;
+
     @NotNull(groups = ValidationMarker.OnCreate.class)
     private String description;
+
     @NotNull(groups = ValidationMarker.OnCreate.class)
     private Boolean available;
 }

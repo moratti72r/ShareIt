@@ -24,25 +24,25 @@ public class UserController {
 
     @PostMapping
     @Validated({ValidationMarker.OnCreate.class})
-    public User create(@RequestBody @Valid UserDto userDto) {
+    public UserDto create(@RequestBody @Valid UserDto userDto) {
         log.info("Получен POST запрос /users");
         return userService.addUser(userDto);
     }
 
     @PatchMapping("/{id}")
-    public User upDate(@PathVariable long id, @RequestBody UserDto userDto) {
+    public UserDto upDate(@PathVariable long id, @RequestBody UserDto userDto) {
         log.info("Получен PATCH запрос /users/{}", id);
         return userService.updateUser(id, userDto);
     }
 
     @GetMapping
-    public List<User> findAll() {
+    public List<UserDto> findAll() {
         log.info("Получен GET запрос /users");
         return userService.findAllUser();
     }
 
     @GetMapping("/{id}")
-    public User findById(@PathVariable long id) {
+    public UserDto findById(@PathVariable long id) {
         log.info("Получен GET запрос /users/{}", id);
         return userService.findUserById(id);
     }

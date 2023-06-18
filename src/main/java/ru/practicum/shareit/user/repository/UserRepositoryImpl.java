@@ -5,10 +5,10 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
@@ -18,23 +18,25 @@ public class UserRepositoryImpl implements UserRepository {
     private long idGenerator = 0;
 
     @Override
-    public User addUser(UserDto userDto) {
+    public UserDto addUser(User user) {
         idGenerator++;
-        User user = UserMapper.fromUserDto(new User(), userDto);
         user.setId(idGenerator);
-        users.put(user.getId(), user);
-        return user;
+        users.put(idGenerator, user);
+
+        return UserMapper.toUserDto(user);
     }
 
     @Override
-    public User updateUser(long id, UserDto userDto) {
-        UserMapper.fromUserDto(users.get(id), userDto);
-        return users.get(id);
+    public UserDto updateUser(long id, User user) {
+        users.put(id, user);
+        return UserMapper.toUserDto(users.get(id));
     }
 
     @Override
-    public List<User> findAllUser() {
-        return new ArrayList<>(users.values());
+    public List<UserDto> findAllUser() {
+        return users.values().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override

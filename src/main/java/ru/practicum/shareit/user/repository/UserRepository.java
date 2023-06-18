@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface UserRepository {
 
-    User addUser(UserDto userDto);
+    UserDto addUser(User user);
 
-    User updateUser(long id, UserDto userDto);
+    UserDto updateUser(long id, User user);
 
-    List<User> findAllUser();
+    List<UserDto> findAllUser();
 
     User findUserById(long id);
 

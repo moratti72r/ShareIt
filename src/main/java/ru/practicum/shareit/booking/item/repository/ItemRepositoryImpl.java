@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.item.dto.ItemDto;
 import ru.practicum.shareit.booking.item.dto.ItemMapper;
 import ru.practicum.shareit.booking.item.model.Item;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,28 +17,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemRepositoryImpl implements ItemRepository {
 
-    private final UserRepository userRepository;
-
     private final Map<Long, Item> items = new HashMap<>();
 
     private long idGenerator = 0;
 
     @Override
-    public Item addItem(long idUser, ItemDto itemDto) {
+    public ItemDto addItem(Item item) {
 
         idGenerator++;
-        Item item = ItemMapper.fromItemDto(new Item(), itemDto);
         item.setId(idGenerator);
-        item.setOwner(userRepository.findUserById(idUser));
         items.put(item.getId(), item);
 
-        return item;
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
-    public Item updateItem(long idUser, long idItem, ItemDto itemDto) {
-        ItemMapper.fromItemDto(items.get(idItem), itemDto);
-        return items.get(idItem);
+    public ItemDto updateItem(long idItem, Item item) {
+        items.put(idItem, item);
+        return ItemMapper.toItemDto(items.get(idItem));
     }
 
     @Override
@@ -48,14 +43,15 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public List<Item> findAllItemByUser(long idUser) {
+    public List<ItemDto> findAllItemByUser(long idUser) {
         return items.values().stream()
                 .filter(item -> item.getOwner().getId() == idUser)
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Item> searchItem(String text) {
+    public List<ItemDto> searchItem(String text) {
         if (text.isEmpty()) {
             return new ArrayList<>();
         } else {
@@ -63,6 +59,7 @@ public class ItemRepositoryImpl implements ItemRepository {
                     .filter(item -> (StringUtils.containsIgnoreCase(item.getName(), text)
                             || StringUtils.containsIgnoreCase(item.getDescription(), text))
                             && item.getAvailable())
+                    .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         }
     }
@@ -70,5 +67,10 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public boolean contains(long id) {
         return items.containsKey(id);
+    }
+
+    @Override
+    public boolean isExistUser(long idItem, long idUser) {
+        return items.get(idItem).getOwner().getId() == idUser;
     }
 }

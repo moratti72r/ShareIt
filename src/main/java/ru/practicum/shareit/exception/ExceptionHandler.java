@@ -15,7 +15,7 @@ public class ExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleFilmNotFound(NotFoundException e) {
+    public Map<String, String> handleNotFound(NotFoundException e) {
         log.warn("Получен статус 404 Not found {}", e.getMessage(), e);
         return Map.of("message", e.getMessage());
     }
@@ -43,7 +43,7 @@ public class ExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleValidation(DuplicateValuesException e) {
+    public Map<String, String> handleDuplicateValues(DuplicateValuesException e) {
         log.warn("Получен статус 409 Conflict {}", e.getMessage(), e);
         return Map.of("message", e.getMessage());
     }

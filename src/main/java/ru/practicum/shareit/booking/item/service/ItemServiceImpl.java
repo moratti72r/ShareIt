@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.item.dto.ItemDto;
+import ru.practicum.shareit.booking.item.dto.ItemMapper;
 import ru.practicum.shareit.booking.item.model.Item;
 import ru.practicum.shareit.booking.item.repository.ItemRepository;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -21,58 +22,74 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
 
     @Override
-    public Item addItem(long idUser, ItemDto itemDto) {
+    public ItemDto addItem(long idUser, ItemDto itemDto) {
         if (!userRepository.contains(idUser)) {
             throw new NotFoundException(UserRepository.class);
         }
-        Item resultItem = itemRepository.addItem(idUser, itemDto);
-        log.info("Продукт c id={} от Пользователя с id={} добавлен", resultItem.getId(), idUser);
-        return resultItem;
+        Item item = ItemMapper.fromItemDto(new Item(), itemDto);
+        item.setOwner(userRepository.findUserById(idUser));
+
+        ItemDto resultItemDto = itemRepository.addItem(item);
+        log.info("Продукт c id={} от Пользователя с id={} добавлен", resultItemDto.getId(), idUser);
+        return resultItemDto;
     }
 
     @Override
-    public Item updateItem(long idUser, long idItem, ItemDto itemDto) {
+    public ItemDto updateItem(long idUser, long idItem, ItemDto itemDto) {
         if (!userRepository.contains(idUser)) {
             throw new NotFoundException(UserRepository.class);
         }
         if (!itemRepository.contains(idItem)) {
             throw new NotFoundException(ItemRepository.class);
         }
-        if (!itemRepository.findItemById(idItem).getOwner().equals(userRepository.findUserById(idUser))) {
+        if (!itemRepository.isExistUser(idItem, idUser)) {
             throw new NotFoundException(UserRepository.class);
         }
+
+        Item item = itemRepository.findItemById(idItem);
+        ItemMapper.fromItemDto(item, itemDto);
+
+        ItemDto resultItemDto = itemRepository.updateItem(idItem, item);
         log.info("Продукт c id={} успешно изменен Пользователем с id={}", idItem, idUser);
-        return itemRepository.updateItem(idUser, idItem, itemDto);
+
+        return resultItemDto;
     }
 
     @Override
-    public Item findItemById(long idUser, long idItem) {
+    public ItemDto findItemById(long idUser, long idItem) {
         if (!userRepository.contains(idUser)) {
             throw new NotFoundException(UserRepository.class);
         }
         if (!itemRepository.contains(idItem)) {
             throw new NotFoundException(ItemRepository.class);
         }
+
+        ItemDto resultItemDto = ItemMapper.toItemDto(itemRepository.findItemById(idItem));
         log.info("Продукт c id={} успешно изменен Пользователем с id={}", idItem, idUser);
-        return itemRepository.findItemById(idItem);
+
+        return resultItemDto;
     }
 
     @Override
-    public List<Item> findAllItemByUser(long idUser) {
+    public List<ItemDto> findAllItemByUser(long idUser) {
         if (!userRepository.contains(idUser)) {
             throw new NotFoundException(UserRepository.class);
         }
+        List<ItemDto> result = itemRepository.findAllItemByUser(idUser);
         log.info("Список продуктов от Пользователя c id={} получен", idUser);
-        return itemRepository.findAllItemByUser(idUser);
+
+        return result;
     }
 
     @Override
-    public List<Item> searchItem(long idUser, String text) {
+    public List<ItemDto> searchItem(long idUser, String text) {
         if (!userRepository.contains(idUser)) {
             throw new NotFoundException(UserRepository.class);
         }
+        List<ItemDto> result = itemRepository.searchItem(text);
         log.info("Получен список доступных продуктов в поиске по тексту \"{}\" " +
                 "для Пользователя с id={}", text, idUser);
-        return itemRepository.searchItem(text);
+
+        return result;
     }
 }

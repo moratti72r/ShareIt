@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
 @Data
 public class UserDto {
 
+    private long id;
+
     @NotNull(groups = ValidationMarker.OnCreate.class)
     private String name;
     @Email

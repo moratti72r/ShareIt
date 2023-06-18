@@ -7,15 +7,17 @@ import java.util.List;
 
 public interface ItemRepository {
 
-    Item addItem(long idUser, ItemDto itemDto);
+    ItemDto addItem(Item item);
 
-    Item updateItem(long idUser, long idItem, ItemDto itemDto);
+    ItemDto updateItem(long idItem, Item item);
 
     Item findItemById(long id);
 
-    List<Item> findAllItemByUser(long idUser);
+    List<ItemDto> findAllItemByUser(long idUser);
 
-    List<Item> searchItem(String text);
+    List<ItemDto> searchItem(String text);
 
     boolean contains(long id);
+
+    boolean isExistUser(long idItem, long idUser);
 }
