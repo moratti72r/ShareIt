@@ -2,9 +2,12 @@ package ru.practicum.shareit.booking.item.dto;
 
 import lombok.Data;
 import ru.practicum.shareit.ValidationMarker;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.item.comment.dto.CommentDto;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * TODO Sprint add-controllers.
@@ -23,4 +26,10 @@ public class ItemDto {
 
     @NotNull(groups = ValidationMarker.OnCreate.class)
     private Boolean available;
+
+    private BookingDto lastBooking;
+
+    private BookingDto nextBooking;
+
+    private List<CommentDto> comments;
 }

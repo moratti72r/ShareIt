@@ -8,9 +8,10 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -20,52 +21,49 @@ public class UserService {
     private final UserRepository userRepository;
 
     public UserDto addUser(UserDto userDto) {
-        if (userRepository.isNonExistEmail(userDto.getEmail())) {
-            User user = UserMapper.fromUserDto(new User(), userDto);
-            UserDto result = userRepository.addUser(user);
+        User user = UserMapper.fromUserDto(new User(), userDto);
+        User result = userRepository.save(user);
+        log.info("Пользователь с id={} добавлен", result.getId());
 
-            log.info("Пользователь с id={} добавлен", result.getId());
-            return result;
-        } else throw new DuplicateValuesException(UserRepositoryImpl.class);
+        return UserMapper.toUserDto(result);
     }
 
     public UserDto updateUser(long id, UserDto userDto) {
-        if (!userRepository.contains(id)) {
-            throw new NotFoundException(UserRepositoryImpl.class);
+        if (userDto.getEmail() != null && userRepository.existsUserByEmailAndIdNot(userDto.getEmail(), id)) {
+            throw new DuplicateValuesException(UserRepository.class);
         }
-        if (userDto.getEmail() != null
-                && !userRepository.isNonExistEmail(userDto.getEmail())
-                && !userRepository.findUserById(id).getEmail().equals(userDto.getEmail())) {
-            throw new DuplicateValuesException(UserRepositoryImpl.class);
-        }
-        User user = userRepository.findUserById(id);
-        UserMapper.fromUserDto(user, userDto);
-
-        UserDto result = userRepository.updateUser(id, user);
-        log.info("Пользователь c id={} успешно изменен", id);
-
-        return result;
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            User updateUser = UserMapper.fromUserDto(user, userDto);
+            updateUser.setId(id);
+            userRepository.save(updateUser);
+            log.info("Пользователь c id={} успешно изменен", id);
+            return UserMapper.toUserDto(updateUser);
+        } else throw new NotFoundException(UserRepository.class);
     }
 
     public List<UserDto> findAllUser() {
-        List<UserDto> result = userRepository.findAllUser();
+        List<UserDto> result = userRepository.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
         log.info("Список пользователей получен");
         return result;
     }
 
     public UserDto findUserById(long id) {
-        if (userRepository.contains(id)) {
-
-            UserDto result = UserMapper.toUserDto(userRepository.findUserById(id));
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            UserDto result = UserMapper.toUserDto(user);
             log.info("Пользователь с id={} получен", id);
             return result;
-        } else throw new NotFoundException(UserRepositoryImpl.class);
+        } else throw new NotFoundException(UserRepository.class);
     }
 
     public void deleteUserById(long id) {
-        if (userRepository.contains(id)) {
-            userRepository.deleteUserById(id);
-            log.info("Пользователь с id={} удален", id);
-        } else throw new NotFoundException(UserRepositoryImpl.class);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+        } else throw new NotFoundException(UserRepository.class);
     }
 }

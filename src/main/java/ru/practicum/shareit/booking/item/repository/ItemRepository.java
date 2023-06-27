@@ -1,23 +1,20 @@
 package ru.practicum.shareit.booking.item.repository;
 
-import ru.practicum.shareit.booking.item.dto.ItemDto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.item.model.Item;
 
 import java.util.List;
 
-public interface ItemRepository {
+@Repository
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    ItemDto addItem(Item item);
+    @Query("SELECT it FROM Item AS it WHERE it.owner.id = ?1")
+    List<Item> findAllItemByUser(long idUser);
 
-    ItemDto updateItem(long idItem, Item item);
+    @Query("SELECT it FROM Item AS it WHERE (LOWER(it.name) LIKE CONCAT ('%',LOWER(?1),'%') " +
+            "OR LOWER(it.description) LIKE CONCAT ('%',LOWER(?1),'%')) AND it.available=true")
+    List<Item> searchItem(String text);
 
-    Item findItemById(long id);
-
-    List<ItemDto> findAllItemByUser(long idUser);
-
-    List<ItemDto> searchItem(String text);
-
-    boolean contains(long id);
-
-    boolean isExistUser(long idItem, long idUser);
 }

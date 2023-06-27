@@ -15,6 +15,9 @@ public class UserMapper {
 
     public static User fromUserDto(User user, UserDto userDto) {
 
+        if (userDto.getId() != 0) {
+            user.setId(userDto.getId());
+        }
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }
