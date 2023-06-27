@@ -61,8 +61,7 @@ public class ItemServiceImpl implements ItemService {
         if (!itemRepository.existsById(itemId)) {
             throw new NotFoundException(ItemRepository.class);
         }
-        if (bookingRepository.existsByItemIdAndBookerIdAndStatusAndEndIsBefore
-                (itemId, userId, StatusType.APPROVED, LocalDateTime.now())) {
+        if (bookingRepository.existsByItemIdAndBookerIdAndStatusAndEndIsBefore (itemId, userId, StatusType.APPROVED, LocalDateTime.now())) {
             Comment comment = new Comment();
             Item item = itemRepository.findById(itemId).get();
             User user = userRepository.findById(userId).get();

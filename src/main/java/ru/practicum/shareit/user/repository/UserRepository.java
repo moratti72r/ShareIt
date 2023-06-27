@@ -8,7 +8,6 @@ import ru.practicum.shareit.user.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsUserByEmailAndIdNot(String email, long userId);
-    boolean existsUsersByEmail(String email);
 
     boolean existsUserById(Long userId);
 
