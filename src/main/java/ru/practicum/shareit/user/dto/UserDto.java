@@ -15,6 +15,7 @@ public class UserDto {
     @NotNull(groups = ValidationMarker.OnCreate.class)
     @Size(max = 255)
     private String name;
+
     @Email
     @Size(max = 255)
     @NotNull(groups = ValidationMarker.OnCreate.class)
