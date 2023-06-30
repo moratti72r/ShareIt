@@ -10,7 +10,7 @@ public enum ApproveStatus {
 
     public static ApproveStatus toApproveStatus(String parameter) {
         for (ApproveStatus approveStatus : values()) {
-            if (approveStatus.name().equals(parameter)) {
+            if (approveStatus.name().equalsIgnoreCase(parameter)) {
                 return approveStatus;
             }
         }

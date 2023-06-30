@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.item.comment.dto.CommentDto;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -17,11 +18,12 @@ public class ItemDto {
 
     private long id;
 
-    @NotNull(groups = ValidationMarker.OnCreate.class)
     @NotEmpty(groups = ValidationMarker.OnCreate.class)
+    @Size(max = 255)
     private String name;
 
     @NotNull(groups = ValidationMarker.OnCreate.class)
+    @Size(max = 1000)
     private String description;
 
     @NotNull(groups = ValidationMarker.OnCreate.class)

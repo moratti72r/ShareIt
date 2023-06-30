@@ -37,12 +37,12 @@ public class BookingServiceImpl implements BookingService {
             throw new IncorrectArgumentException(BookingRepository.class);
         }
         if (!userRepository.existsUserById(userId)) {
-            throw new InternalServerException(format("ID {0} NOT EXIST", userId));
+            throw new NotFoundException(UserRepository.class);
         }
         if (!itemRepository.existsById(bookingDto.getItemId())) {
             throw new NotFoundException(ItemRepository.class);
         }
-        Booking booking = BookingMapper.fromBookingDto(new Booking(), bookingDto);
+        Booking booking = BookingMapper.fromBookingDto(bookingDto);
 
         Optional<Item> itemOptional = itemRepository.findById(bookingDto.getItemId());
         Item item = itemOptional.get();
@@ -72,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
             Booking booking = bookingOptional.get();
             Item item = booking.getItem();
             if (!userRepository.existsById(item.getOwner().getId())) {
-                throw new IncorrectArgumentException(BookingRepository.class);
+                throw new NotFoundException(UserRepository.class);
             }
             if (item.getOwner().getId() != userId) {
                 throw new NotFoundException(BookingService.class);
@@ -119,7 +119,7 @@ public class BookingServiceImpl implements BookingService {
         if (status == null) throw new InternalServerException(format("Unknown state: {0}", parameter));
 
         if (!userRepository.existsById(userId)) {
-            throw new InternalServerException(format("ID {0} NOT EXIST", userId));
+            throw new NotFoundException(UserRepository.class);
         }
 
         List<Booking> result = new ArrayList<>();
@@ -152,8 +152,9 @@ public class BookingServiceImpl implements BookingService {
         ApproveStatus status = ApproveStatus.toApproveStatus(parameter);
 
         if (status == null) throw new InternalServerException(format("Unknown state: {0}", parameter));
+
         if (!userRepository.existsById(userId)) {
-            throw new InternalServerException(format("ID {0} NOT EXIST", userId));
+            throw new NotFoundException(UserRepository.class);
         }
 
         List<Booking> result = new ArrayList<>();

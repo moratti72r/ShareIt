@@ -29,7 +29,7 @@ public class UserService {
     }
 
     public UserDto updateUser(long id, UserDto userDto) {
-        if (userDto.getEmail() != null && userRepository.existsUserByEmailAndIdNot(userDto.getEmail(), id)) {
+        if (userDto.getEmail() != null && userRepository.existsUserByEmailAndIdIsNot(userDto.getEmail(), id)) {
             throw new DuplicateValuesException(UserRepository.class);
         }
         Optional<User> userOptional = userRepository.findById(id);
@@ -37,9 +37,9 @@ public class UserService {
             User user = userOptional.get();
             User updateUser = UserMapper.fromUserDto(user, userDto);
             updateUser.setId(id);
-            userRepository.save(updateUser);
+            User result = userRepository.save(updateUser);
             log.info("Пользователь c id={} успешно изменен", id);
-            return UserMapper.toUserDto(updateUser);
+            return UserMapper.toUserDto(result);
         } else throw new NotFoundException(UserRepository.class);
     }
 
@@ -62,8 +62,6 @@ public class UserService {
     }
 
     public void deleteUserById(long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-        } else throw new NotFoundException(UserRepository.class);
+        userRepository.deleteById(id);
     }
 }
