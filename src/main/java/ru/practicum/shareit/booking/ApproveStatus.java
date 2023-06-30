@@ -8,6 +8,7 @@ public enum ApproveStatus {
     WAITING,
     REJECTED;
 
+    
     public static ApproveStatus toApproveStatus(String parameter) {
         for (ApproveStatus approveStatus : values()) {
             if (approveStatus.name().equalsIgnoreCase(parameter)) {
