@@ -5,9 +5,6 @@ import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @Entity
 @Table(name = "items", schema = "public")
