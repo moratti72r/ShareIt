@@ -96,7 +96,6 @@ public class ItemServiceImpl implements ItemService {
 
             return ItemMapper.toItemDto(updateItem);
         } else throw new NotFoundException(ItemRepository.class);
-
     }
 
     @Override
