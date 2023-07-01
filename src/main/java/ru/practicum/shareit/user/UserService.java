@@ -36,7 +36,6 @@ public class UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             User updateUser = UserMapper.fromUserDto(user, userDto);
-            updateUser.setId(id);
             User result = userRepository.save(updateUser);
             log.info("Пользователь c id={} успешно изменен", id);
             return UserMapper.toUserDto(result);
