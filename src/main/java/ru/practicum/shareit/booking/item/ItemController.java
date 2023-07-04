@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.ValidationMarker;
+import ru.practicum.shareit.booking.item.comment.dto.CommentDto;
 import ru.practicum.shareit.booking.item.dto.ItemDto;
 import ru.practicum.shareit.booking.item.service.ItemService;
 
@@ -28,6 +29,15 @@ public class ItemController {
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") long idUser, @RequestBody @Valid ItemDto itemDto) {
         log.info("Получен POST запрос /items");
         return itemService.addItem(idUser, itemDto);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    @Validated({ValidationMarker.OnCreate.class})
+    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long idUser,
+                                    @PathVariable long itemId,
+                                    @RequestBody @Valid CommentDto commentDto) {
+        log.info("Получен POST запрос /items");
+        return itemService.addComment(idUser, itemId, commentDto);
     }
 
     @PatchMapping("/{idItem}")

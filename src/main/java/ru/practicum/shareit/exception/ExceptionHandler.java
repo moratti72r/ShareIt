@@ -50,7 +50,14 @@ public class ExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleIncorrectArguments(Throwable e) {
+    public Map<String, String> handleInternalServerError(InternalServerException e) {
+        log.warn("Получен статус 500 Internal Server Error {}", e.getMessage(), e);
+        return Map.of("error", e.getMessage());
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleInternalServerError(Throwable e) {
         log.warn("Получен статус 500 Internal Server Error {}", e.getMessage(), e);
         return Map.of("message", e.getMessage());
     }
