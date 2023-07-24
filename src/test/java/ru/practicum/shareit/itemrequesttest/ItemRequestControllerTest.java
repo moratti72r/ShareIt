@@ -7,9 +7,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.ItemRequestController;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.xml.bind.ValidationException;
 import java.nio.charset.StandardCharsets;
@@ -67,6 +69,24 @@ public class ItemRequestControllerTest {
     }
 
     @Test
+    void catchNotFoundExceptionWhenCreateRequestWithUserIsNotValid() throws Exception {
+
+        requestDto.setDescription("Описание");
+
+        when(service.addItemRequest(anyLong(), any()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(post("/requests")
+                        .content(mapper.writeValueAsString(requestDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
     void findById() throws Exception {
 
         when(service.findRequestById(anyLong(), anyLong()))
@@ -78,6 +98,20 @@ public class ItemRequestControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(requestDto)));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenFindByIdWithUserIsNotExist() throws Exception {
+
+        when(service.findRequestById(anyLong(), anyLong()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(get("/requests/{requestId}", 1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
     }
 
     @Test
@@ -93,6 +127,21 @@ public class ItemRequestControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(requestDtoList)));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenFindAllRequestsByUserWithUserIsNotExist() throws Exception {
+        when(service.findAllRequestsByRequestor(anyLong(), anyInt(), anyInt()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(get("/requests")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .param("from", "0")
+                        .param("size", "20")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
     }
 
     @Test
@@ -120,6 +169,21 @@ public class ItemRequestControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(requestDtoList)));
+    }
+
+    @Test
+    void catchValidationExceptionWhenFindAllRequestsWithUserIsNotExist() throws Exception {
+        when(service.findAllRequests(anyLong(), anyInt(), anyInt()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(get("/requests/all")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .param("from", "0")
+                        .param("size", "20")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
     }
 
     @Test

@@ -10,7 +10,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.item.ItemController;
 import ru.practicum.shareit.booking.item.comment.dto.CommentDto;
 import ru.practicum.shareit.booking.item.dto.ItemDto;
+import ru.practicum.shareit.booking.item.repository.ItemRepository;
 import ru.practicum.shareit.booking.item.service.ItemService;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.IncorrectArgumentException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.xml.bind.ValidationException;
 import java.nio.charset.StandardCharsets;
@@ -83,6 +89,40 @@ public class ItemControllerTest {
     }
 
     @Test
+    void catchNotFoundExceptionWhenCreateItemWithUserIsNotExist() throws Exception {
+        ItemDto itemDto = makeItemDto(1, "Инструмент", "Описание", true);
+
+        when(itemService.addItem(anyLong(), any()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(post("/items")
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenCreateItemWithRequestIsNotExist() throws Exception {
+        ItemDto itemDto = makeItemDto(1, "Инструмент", "Описание", true);
+
+        when(itemService.addItem(anyLong(), any()))
+                .thenThrow(new NotFoundException(ItemRequestRepository.class));
+
+        mvc.perform(post("/items")
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
     void createComment() throws Exception {
         CommentDto commentDto = makeCommentDto(1, "Комментарий");
         when(itemService.addComment(anyLong(), anyLong(), any()))
@@ -114,6 +154,57 @@ public class ItemControllerTest {
     }
 
     @Test
+    void catchNotFoundExceptionWhenCreateCommentWithUserIsNotExist() throws Exception {
+        CommentDto commentDto = makeCommentDto(1, "comment");
+
+        when(itemService.addComment(anyLong(), anyLong(), any()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(post("/items/{idItem}/comment", 1)
+                        .content(mapper.writeValueAsString(commentDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenCreateCommentWithItemIsNotExist() throws Exception {
+        CommentDto commentDto = makeCommentDto(1, "comment");
+
+        when(itemService.addComment(anyLong(), anyLong(), any()))
+                .thenThrow(new NotFoundException(ItemRepository.class));
+
+        mvc.perform(post("/items/{idItem}/comment", 1)
+                        .content(mapper.writeValueAsString(commentDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchIncorrectArgumentExceptionWhenCreateCommentWithUserIsUnusedItem() throws Exception {
+        CommentDto commentDto = makeCommentDto(1, "comment");
+
+        when(itemService.addComment(anyLong(), anyLong(), any()))
+                .thenThrow(new IncorrectArgumentException(BookingRepository.class));
+
+        mvc.perform(post("/items/{idItem}/comment", 1)
+                        .content(mapper.writeValueAsString(commentDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(IncorrectArgumentException.class));
+    }
+
+    @Test
     void patchItem() throws Exception {
         ItemDto itemDto = makeItemDto(1, "Инструмент", "Описание", true);
 
@@ -134,6 +225,57 @@ public class ItemControllerTest {
     }
 
     @Test
+    void catchNotFoundExceptionWhenPatchItemWithUserIsNotExist() throws Exception {
+        ItemDto itemDto = makeItemDto(1, "Инструмент", "Описание", true);
+
+        when(itemService.updateItem(anyLong(), anyLong(), any()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(patch("/items/{idItem}", 1)
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenPatchItemWithUserIsNotOwner() throws Exception {
+        ItemDto itemDto = makeItemDto(1, "Инструмент", "Описание", true);
+
+        when(itemService.updateItem(anyLong(), anyLong(), any()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(patch("/items/{idItem}", 1)
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenPatchItemWithItemIsNotExist() throws Exception {
+        ItemDto itemDto = makeItemDto(1, "Инструмент", "Описание", true);
+
+        when(itemService.updateItem(anyLong(), anyLong(), any()))
+                .thenThrow(new NotFoundException(ItemRepository.class));
+
+        mvc.perform(patch("/items/{idItem}", 1)
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
     void findById() throws Exception {
         ItemDto itemDto = makeItemDto(1, "Инструмент", "Описание", true);
 
@@ -150,6 +292,34 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
                 .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
                 .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenFindByIdWithUserIsNotExist() throws Exception {
+
+        when(itemService.findItemById(anyLong(), anyLong()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(get("/items/{id}", 1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenFindByIdWithItemIsNotExist() throws Exception {
+
+        when(itemService.findItemById(anyLong(), anyLong()))
+                .thenThrow(new NotFoundException(ItemRepository.class));
+
+        mvc.perform(get("/items/{id}", 1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
     }
 
     @Test
@@ -213,14 +383,32 @@ public class ItemControllerTest {
     @Test
     void catchValidationExceptionWhenSearchItemsWithParamNotValid() throws Exception {
 
-        mvc.perform(get("/items")
+        mvc.perform(get("/items/search")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("X-Sharer-User-Id", 1)
+                        .param("text", "ееееее")
                         .param("from", "-20")
                         .param("size", "20")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(ValidationException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenSearchItemsWithUserIsNotExist() throws Exception {
+
+        when(itemService.searchItem(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(get("/items/search")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .param("text", "ееееее")
+                        .param("from", "0")
+                        .param("size", "20")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
     }
 
     private ItemDto makeItemDto(long id, String name, String description, Boolean available) {

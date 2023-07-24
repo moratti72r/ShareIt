@@ -11,10 +11,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.item.model.Item;
+import ru.practicum.shareit.booking.item.repository.ItemRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusType;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.IncorrectArgumentException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.xml.bind.ValidationException;
 import java.nio.charset.StandardCharsets;
@@ -65,6 +70,54 @@ public class BookingControllerTest {
     }
 
     @Test
+    void catchIncorrectArgumentExceptionWhenCreateBookingWithIncorrectEndAndStart() throws Exception {
+
+        when(bookingService.addBooking(anyLong(), any()))
+                .thenThrow(new IncorrectArgumentException(BookingRepository.class));
+
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(IncorrectArgumentException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenCreateBookingWithUserIsNotExist() throws Exception {
+
+        when(bookingService.addBooking(anyLong(), any()))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenCreateBookingWithItemIsNotExist() throws Exception {
+
+        when(bookingService.addBooking(anyLong(), any()))
+                .thenThrow(new NotFoundException(ItemRepository.class));
+
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
     void catchValidationExceptionWhenCreateBookingWithNameNotValidStart() throws Exception {
         BookingDto bookingDto = makeBookingDto(LocalDateTime.now().minusHours(1), LocalDateTime.now().plusHours(2), 1);
 
@@ -105,6 +158,66 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(booking)));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenUpdateStatusWithUserIsNotExist() throws Exception {
+
+        when(bookingService.changeBookingStatus(1, 1, true))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(patch("/bookings/{bookingId}", 1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .param("approved", "true")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenUpdateStatusWithBookingIsNotExist() throws Exception {
+
+        when(bookingService.changeBookingStatus(1, 1, true))
+                .thenThrow(new NotFoundException(BookingRepository.class));
+
+        mvc.perform(patch("/bookings/{bookingId}", 1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .param("approved", "true")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchNotFoundExceptionWhenUpdateStatusWithUserIsNotOwner() throws Exception {
+
+        when(bookingService.changeBookingStatus(1, 1, true))
+                .thenThrow(new NotFoundException(BookingService.class));
+
+        mvc.perform(patch("/bookings/{bookingId}", 1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .param("approved", "true")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
+    void catchIncorrectArgumentExceptionWhenUpdateStatusWithStatusIsIncorrect() throws Exception {
+
+        when(bookingService.changeBookingStatus(1, 1, true))
+                .thenThrow(new IncorrectArgumentException(BookingRepository.class));
+
+        mvc.perform(patch("/bookings/{bookingId}", 1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .param("approved", "true")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(IncorrectArgumentException.class));
     }
 
     @Test

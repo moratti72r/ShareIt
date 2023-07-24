@@ -101,6 +101,23 @@ public class UserControllerTest {
     }
 
     @Test
+    void catchNotFoundExceptionPatchUserWithUserIsNotFound() throws Exception {
+
+        UserDto updateUser = makeUserDto(99, null, "duplicate@email");
+
+        when(userService.updateUser(99, updateUser))
+                .thenThrow(new NotFoundException(UserRepository.class));
+
+        mvc.perform(patch("/users/{id}", 99)
+                        .content(mapper.writeValueAsString(updateUser))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
+    }
+
+    @Test
     void catchDuplicateValuesExceptionPatchUserWithDuplicateEmail() throws Exception {
 
         UserDto updateUser = makeUserDto(1, null, "duplicate@email");
@@ -150,6 +167,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.name", is(userDto1.getName())))
                 .andExpect(jsonPath("$.email", is(userDto1.getEmail())));
     }
+
+
 
     @Test
     void catchNotFoundExceptionWhenFindNotFoundUserById() throws Exception {
