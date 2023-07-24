@@ -288,7 +288,7 @@ public class ItemServiceImplTest {
     void catchNotFoundExceptionWhenFindItemByIdWithNotExistUser() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            itemService.findItemById(99, item1.getId());
+            itemService.findItemById(999, item1.getId());
         });
         assertTrue(UserRepository.class.getName().contains(exception.getMessage()));
     }
