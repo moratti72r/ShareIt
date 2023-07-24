@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.StatusType;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -20,7 +19,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import static java.text.MessageFormat.format;
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
