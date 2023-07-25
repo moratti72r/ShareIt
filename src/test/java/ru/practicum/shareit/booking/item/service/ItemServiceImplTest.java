@@ -1,4 +1,4 @@
-package ru.practicum.shareit.itemtests;
+package ru.practicum.shareit.booking.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -330,7 +330,7 @@ public class ItemServiceImplTest {
     void catchNotFoundExceptionWhenSearchItemWithNotExistUser() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            itemService.searchItem(99, "инструмент", 0, 20);
+            itemService.searchItem(999, "инструмент", 0, 20);
         });
         assertTrue(UserRepository.class.getName().contains(exception.getMessage()));
     }
