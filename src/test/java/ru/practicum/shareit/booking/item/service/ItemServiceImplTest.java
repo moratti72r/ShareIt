@@ -162,7 +162,7 @@ public class ItemServiceImplTest {
         commentDto.setText("Комментарий");
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            itemService.addComment(99, item1.getId(), commentDto);
+            itemService.addComment(999, item1.getId(), commentDto);
         });
         assertTrue(UserRepository.class.getName().contains(exception.getMessage()));
     }
@@ -173,7 +173,7 @@ public class ItemServiceImplTest {
         commentDto.setText("Комментарий");
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            itemService.addComment(user1.getId(), 99, commentDto);
+            itemService.addComment(user1.getId(), 999, commentDto);
         });
         assertTrue(ItemRepository.class.getName().contains(exception.getMessage()));
     }
@@ -212,7 +212,7 @@ public class ItemServiceImplTest {
         ItemDto itemDto = makeItemDto(null, "Описание3", false, itemRequest1.getId());
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            itemService.updateItem(99, item1.getId(), itemDto);
+            itemService.updateItem(999, item1.getId(), itemDto);
         });
         assertTrue(UserRepository.class.getName().contains(exception.getMessage()));
     }
@@ -223,7 +223,7 @@ public class ItemServiceImplTest {
         ItemDto itemDto = makeItemDto(null, "Описание3", false, itemRequest1.getId());
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            itemService.updateItem(user2.getId(), 99, itemDto);
+            itemService.updateItem(user2.getId(), 999, itemDto);
         });
         assertTrue(ItemRepository.class.getName().contains(exception.getMessage()));
     }
@@ -297,7 +297,7 @@ public class ItemServiceImplTest {
     void catchNotFoundExceptionWhenFindItemByIdWithNotExistItem() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            itemService.findItemById(user1.getId(), 99);
+            itemService.findItemById(user1.getId(), 999);
         });
         assertTrue(ItemRepository.class.getName().contains(exception.getMessage()));
     }

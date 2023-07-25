@@ -106,7 +106,7 @@ public class BookingServiceImplTest {
     void catchNotFoundExceptionWhenAddBookingWithNotExistUser() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            bookingService.addBooking(99, bookingDtoAdd);
+            bookingService.addBooking(999, bookingDtoAdd);
         });
         assertTrue(UserRepository.class.getName().contains(exception.getMessage()));
     }
@@ -114,7 +114,7 @@ public class BookingServiceImplTest {
     @Test
     void catchNotFoundExceptionWhenAddBookingWithNotExistItem() {
 
-        bookingDtoAdd.setItemId(99);
+        bookingDtoAdd.setItemId(999);
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
             bookingService.addBooking(user3.getId(), bookingDtoAdd);
@@ -138,7 +138,7 @@ public class BookingServiceImplTest {
     void catchNotFoundExceptionWhenChangeBookingStatusWithNotExistUser() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            bookingService.changeBookingStatus(99, bookingInFutureWithStatusApproved.getId(), false);
+            bookingService.changeBookingStatus(999, bookingInFutureWithStatusApproved.getId(), false);
         });
         assertTrue(UserRepository.class.getName().contains(exception.getMessage()));
     }
@@ -156,7 +156,7 @@ public class BookingServiceImplTest {
     void catchNotFoundExceptionWhenChangeBookingStatusWithNotExistBooking() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            bookingService.changeBookingStatus(user1.getId(), 99, false);
+            bookingService.changeBookingStatus(user1.getId(), 999, false);
         });
         assertTrue(BookingRepository.class.getName().contains(exception.getMessage()));
     }
@@ -188,7 +188,7 @@ public class BookingServiceImplTest {
     void catchNotFoundExceptionWhenFindBookingByIdWhereNotExistBooking() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            bookingService.findBookingById(user3.getId(), 99);
+            bookingService.findBookingById(user3.getId(), 999);
         });
         assertTrue(BookingRepository.class.getName().contains(exception.getMessage()));
     }
@@ -215,7 +215,7 @@ public class BookingServiceImplTest {
     void catchNotFoundExceptionWhenFindAllBookingsByParameterAndNotExistBooker() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            bookingService.findAllBookingsByParameterAndBooker(99, "ALL", 0, 20);
+            bookingService.findAllBookingsByParameterAndBooker(999, "ALL", 0, 20);
         });
         assertTrue(UserRepository.class.getName().contains(exception.getMessage()));
     }
@@ -250,7 +250,7 @@ public class BookingServiceImplTest {
     void catchNotFoundExceptionWhenFindAllBookingsByParameterAndNotExistItemOwner() {
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            bookingService.findAllBookingsByParameterAndItemOwner(99, "ALL", 0, 20);
+            bookingService.findAllBookingsByParameterAndItemOwner(999, "ALL", 0, 20);
         });
         assertTrue(UserRepository.class.getName().contains(exception.getMessage()));
     }
