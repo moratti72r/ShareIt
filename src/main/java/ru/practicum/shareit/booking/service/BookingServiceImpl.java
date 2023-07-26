@@ -1,16 +1,20 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.StatusType;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.item.model.Item;
 import ru.practicum.shareit.booking.item.repository.ItemRepository;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.IncorrectArgumentException;
 import ru.practicum.shareit.exception.InternalServerException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import static java.text.MessageFormat.format;
@@ -71,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
         if (bookingOptional.isPresent()) {
             Booking booking = bookingOptional.get();
             Item item = booking.getItem();
-            if (!userRepository.existsById(item.getOwner().getId())) {
+            if (!userRepository.existsById(userId)) {
                 throw new NotFoundException(UserRepository.class);
             }
             if (item.getOwner().getId() != userId) {
@@ -114,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findAllBookingsByParameterAndBooker(long userId, String parameter) {
+    public List<Booking> findAllBookingsByParameterAndBooker(long userId, String parameter, int from, int size) {
         ApproveStatus status = ApproveStatus.toApproveStatus(parameter);
         if (status == null) throw new InternalServerException(format("Unknown state: {0}", parameter));
 
@@ -122,25 +126,27 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(UserRepository.class);
         }
 
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+
         List<Booking> result = new ArrayList<>();
         switch (status) {
             case ALL:
-                result = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
+                result = bookingRepository.findAllByBookerIdOrderByStartDesc(userId, pageRequest);
                 break;
             case CURRENT:
-                result = bookingRepository.findAllByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now());
+                result = bookingRepository.findAllByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest);
                 break;
             case PAST:
-                result = bookingRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                result = bookingRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now(), pageRequest);
                 break;
             case FUTURE:
-                result = bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                result = bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now(), pageRequest);
                 break;
             case WAITING:
-                result = bookingRepository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, StatusType.WAITING);
+                result = bookingRepository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, StatusType.WAITING, pageRequest);
                 break;
             case REJECTED:
-                result = bookingRepository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, StatusType.REJECTED);
+                result = bookingRepository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, StatusType.REJECTED, pageRequest);
                 break;
         }
         log.info("Список Бронирований получен Пользователем(бронирующий) с id={} по параметру {}", userId, parameter);
@@ -148,7 +154,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findAllBookingsByParameterAndItemOwner(long userId, String parameter) {
+    public List<Booking> findAllBookingsByParameterAndItemOwner(long userId, String parameter, int from, int size) {
         ApproveStatus status = ApproveStatus.toApproveStatus(parameter);
 
         if (status == null) throw new InternalServerException(format("Unknown state: {0}", parameter));
@@ -157,25 +163,27 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(UserRepository.class);
         }
 
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+
         List<Booking> result = new ArrayList<>();
         switch (status) {
             case ALL:
-                result = bookingRepository.findAllBookingsByItemOwner(userId);
+                result = bookingRepository.findAllBookingsByItemOwner(userId, pageRequest);
                 break;
             case CURRENT:
-                result = bookingRepository.findAllBookingsByItemOwnerCurrent(userId);
+                result = bookingRepository.findAllBookingsByItemOwnerCurrent(userId, pageRequest);
                 break;
             case PAST:
-                result = bookingRepository.findAllBookingsByItemOwnerPast(userId);
+                result = bookingRepository.findAllBookingsByItemOwnerPast(userId, pageRequest);
                 break;
             case FUTURE:
-                result = bookingRepository.findAllBookingsByItemOwnerFuture(userId);
+                result = bookingRepository.findAllBookingsByItemOwnerFuture(userId, pageRequest);
                 break;
             case WAITING:
-                result = bookingRepository.findAllBookingsByItemOwnerWithStatusWaiting(userId);
+                result = bookingRepository.findAllBookingsByItemOwnerWithStatusWaiting(userId, pageRequest);
                 break;
             case REJECTED:
-                result = bookingRepository.findAllBookingsByItemOwnerWithStatusCanceled(userId);
+                result = bookingRepository.findAllBookingsByItemOwnerWithStatusCanceled(userId, pageRequest);
                 break;
         }
         log.info("Список Бронирований получен Пользователем(владелец вещи) с id={} по параметру {}", userId, parameter);

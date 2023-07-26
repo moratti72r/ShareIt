@@ -29,6 +29,8 @@ public class ItemDto {
     @NotNull(groups = ValidationMarker.OnCreate.class)
     private Boolean available;
 
+    private Long requestId;
+
     private BookingDto lastBooking;
 
     private BookingDto nextBooking;

@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 /**
@@ -24,7 +27,7 @@ public class BookingController {
     @PostMapping
     public Booking create(@RequestHeader("X-Sharer-User-Id") long idUser,
                           @RequestBody @Valid BookingDto bookingDto) {
-        log.info("Получен POST запрос /bookings");
+        log.info("Получен POST запрос /bookings от пользователя {}", idUser);
         return bookingService.addBooking(idUser, bookingDto);
     }
 
@@ -44,15 +47,19 @@ public class BookingController {
 
     @GetMapping
     public List<Booking> findAllBookingsByParameterAndBooker(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                             @RequestParam(defaultValue = "ALL") String state) {
+                                                             @RequestParam(defaultValue = "ALL") String state,
+                                                             @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                             @RequestParam(defaultValue = "20") @Min(0) int size) {
         log.info("Получен GET запрос /bookings?state={}", state);
-        return bookingService.findAllBookingsByParameterAndBooker(userId, state);
+        return bookingService.findAllBookingsByParameterAndBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<Booking> findAllBookingsByParameterAndItemOwner(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                                @RequestParam(defaultValue = "ALL") String state) {
+                                                                @RequestParam(defaultValue = "ALL") String state,
+                                                                @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                                @RequestParam(defaultValue = "20") @Min(0) int size) {
         log.info("Получен GET запрос /bookings/owner?state={}", state);
-        return bookingService.findAllBookingsByParameterAndItemOwner(userId, state);
+        return bookingService.findAllBookingsByParameterAndItemOwner(userId, state, from, size);
     }
 }

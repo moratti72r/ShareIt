@@ -10,6 +10,7 @@ import ru.practicum.shareit.booking.item.dto.ItemDto;
 import ru.practicum.shareit.booking.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public class ItemController {
     @PostMapping
     @Validated({ValidationMarker.OnCreate.class})
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") long idUser, @RequestBody @Valid ItemDto itemDto) {
-        log.info("Получен POST запрос /items");
+        log.info("Получен POST запрос /items от пользователя {}", idUser);
         return itemService.addItem(idUser, itemDto);
     }
 
@@ -56,16 +57,20 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> findAllItemsByUser(@RequestHeader("X-Sharer-User-Id") long idUser) {
+    public List<ItemDto> findAllItemsByUser(@RequestHeader("X-Sharer-User-Id") long idUser,
+                                            @RequestParam(defaultValue = "0") @Min(0) int from,
+                                            @RequestParam(defaultValue = "20") @Min(0) int size) {
         log.info("Получен GET запрос /items");
-        return itemService.findAllItemByUser(idUser);
+        return itemService.findAllItemByUser(idUser, from, size);
     }
 
     @GetMapping("/search")
     public List<ItemDto> searchItem(@RequestHeader("X-Sharer-User-Id") long idUser,
-                                    @RequestParam String text) {
+                                    @RequestParam String text,
+                                    @RequestParam(defaultValue = "0") @Min(0) int from,
+                                    @RequestParam(defaultValue = "20") @Min(0) int size) {
         log.info("Получен GET запрос /items/search?text={}", text);
-        return itemService.searchItem(idUser, text);
+        return itemService.searchItem(idUser, text, from, size);
     }
 
 }

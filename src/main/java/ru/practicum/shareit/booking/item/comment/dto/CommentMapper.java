@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.item.comment.dto;
 
-import ru.practicum.shareit.booking.item.comment.Comment;
+import ru.practicum.shareit.booking.item.comment.model.Comment;
 
 public class CommentMapper {
 
