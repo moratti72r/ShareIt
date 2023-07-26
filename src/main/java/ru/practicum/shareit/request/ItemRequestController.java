@@ -26,7 +26,7 @@ public class ItemRequestController {
     @PostMapping
     @Validated
     public ItemRequestDto create(@RequestHeader("X-Sharer-User-Id") long userId, @RequestBody @Valid ItemRequestDto itemRequestDto) {
-        log.info("Получен POST запрос /requests");
+        log.info("Получен POST запрос /requests от пользователя {}", userId);
         return itemRequestService.addItemRequest(userId, itemRequestDto);
     }
 

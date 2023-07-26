@@ -27,7 +27,7 @@ public class BookingController {
     @PostMapping
     public Booking create(@RequestHeader("X-Sharer-User-Id") long idUser,
                           @RequestBody @Valid BookingDto bookingDto) {
-        log.info("Получен POST запрос /bookings");
+        log.info("Получен POST запрос /bookings от пользователя {}", idUser);
         return bookingService.addBooking(idUser, bookingDto);
     }
 

@@ -14,11 +14,13 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,17 +36,17 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto addItemRequest(long idUser, ItemRequestDto itemRequestDto) {
-        if (!userRepository.existsUserById(idUser)) {
-            throw new NotFoundException(UserRepository.class);
-        }
-        itemRequestDto.setCreated(LocalDateTime.now());
-        ItemRequest itemRequest = ItemRequestMapper.fromItemRequestDto(itemRequestDto);
-        itemRequest.setRequestor(userRepository.findById(idUser).get());
+        Optional<User> userOptional = userRepository.findById(idUser);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            itemRequestDto.setCreated(LocalDateTime.now());
+            ItemRequest itemRequest = ItemRequestMapper.fromItemRequestDto(user, itemRequestDto);
 
-        ItemRequest result = itemRequestRepository.save(itemRequest);
-        log.info("Запрос c id={} от Пользователя с id={} добавлен", result.getId(), idUser);
+            ItemRequest result = itemRequestRepository.save(itemRequest);
+            log.info("Запрос c id={} от Пользователя с id={} добавлен", result.getId(), idUser);
 
-        return ItemRequestMapper.toItemRequestDto(result);
+            return ItemRequestMapper.toItemRequestDto(result);
+        } else throw new NotFoundException(UserRepository.class);
     }
 
     @Override
