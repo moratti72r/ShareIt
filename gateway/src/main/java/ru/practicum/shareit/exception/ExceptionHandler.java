@@ -26,4 +26,11 @@ public class ExceptionHandler {
         log.warn("Получен статус 400 Bad request {}", e.getMessage(), e);
         return Map.of("message", e.getMessage());
     }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleInternalServerError(Throwable e) {
+        log.warn("Получен статус 500 Internal Server Error {}", e.getMessage(), e);
+        return Map.of("message", e.getMessage());
+    }
 }
